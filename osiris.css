@@ -1,0 +1,1847 @@
+/* ==========================================================================
+   J.A.R.V.I.S. A.I. TACTICAL HUD & INTELLIGENCE SUITE
+   Aesthetics: Stark Industries Holographic HUD / Arc Reactor Cyan (#00f0ff)
+   ========================================================================== */
+
+:root {
+  --osiris-cyan: #00f0ff;
+  --osiris-cyan-dim: rgba(0, 240, 255, 0.15);
+  --osiris-cyan-glow: rgba(0, 240, 255, 0.45);
+  --jarvis-cyan: #00f0ff;
+  --jarvis-cyan-bright: #38bdf8;
+  --jarvis-arc-blue: #0284c7;
+  --jarvis-glow: rgba(0, 240, 255, 0.55);
+  --osiris-gold: #00f0ff;
+  --osiris-gold-glow: rgba(0, 240, 255, 0.4);
+  --stark-gold: #f59e0b;
+  --stark-red: #ef4444;
+  --osiris-red: #ef4444;
+  --osiris-red-glow: rgba(239, 68, 68, 0.5);
+  --osiris-bg: rgba(7, 12, 24, 0.94);
+  --osiris-bg-card: rgba(13, 20, 38, 0.85);
+  --osiris-border: rgba(0, 240, 255, 0.22);
+  --osiris-border-gold: rgba(0, 240, 255, 0.35);
+  --osiris-font-mono: 'Consolas', 'Courier New', monospace;
+}
+
+/* --- Botón Modo J.A.R.V.I.S. en Cabecera y Menú de Capas --- */
+#osirisMenuBtn .osiris-eye-icon,
+#osirisMenuBtn .jarvis-arc-reactor {
+  width: 16px;
+  height: 16px;
+  filter: drop-shadow(0 0 5px rgba(0, 240, 255, 0.8));
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), filter 0.25s ease;
+  flex-shrink: 0;
+}
+
+#osirisMenuBtn:hover .osiris-eye-icon,
+#osirisMenuBtn:hover .jarvis-arc-reactor {
+  transform: scale(1.18) rotate(18deg);
+  filter: drop-shadow(0 0 8px #00f0ff) drop-shadow(0 0 12px rgba(0, 240, 255, 0.6));
+}
+
+#osirisMenuBtn.active {
+  background: rgba(0, 240, 255, 0.16) !important;
+  border-color: rgba(0, 240, 255, 0.55) !important;
+  color: #38bdf8 !important;
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.35) !important;
+}
+
+.osiris-close-btn#osirisExitBtn:hover {
+  background: rgba(239, 68, 68, 0.25) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+  color: #fca5a5 !important;
+}
+
+.osiris-action-btn {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(2, 132, 199, 0.1)) !important;
+  border: 1px solid var(--jarvis-glow) !important;
+  color: #e0f2fe !important;
+  position: relative;
+  overflow: visible;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.osiris-action-btn:hover {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.3), rgba(2, 132, 199, 0.25)) !important;
+  border-color: var(--osiris-cyan) !important;
+  box-shadow: 0 0 16px var(--jarvis-glow), 0 0 24px var(--osiris-cyan-glow) !important;
+  transform: scale(1.06);
+}
+
+.osiris-action-btn.active {
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.4), rgba(2, 132, 199, 0.35)) !important;
+  border-color: var(--osiris-cyan) !important;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.6), inset 0 0 10px rgba(0, 240, 255, 0.4) !important;
+}
+
+.osiris-eye-icon,
+.jarvis-arc-reactor {
+  width: 22px;
+  height: 22px;
+  display: block;
+  filter: drop-shadow(0 0 4px rgba(0, 240, 255, 0.7));
+  transition: transform 0.3s ease;
+}
+
+.osiris-action-btn:hover .osiris-eye-icon,
+.osiris-action-btn:hover .jarvis-arc-reactor {
+  transform: rotate(18deg) scale(1.1);
+  filter: drop-shadow(0 0 8px var(--osiris-cyan));
+}
+
+@keyframes jarvisArcPulse {
+  0% { filter: drop-shadow(0 0 3px #00f0ff) drop-shadow(0 0 6px rgba(0, 240, 255, 0.4)); }
+  50% { filter: drop-shadow(0 0 6px #00f0ff) drop-shadow(0 0 16px rgba(0, 240, 255, 0.9)); }
+  100% { filter: drop-shadow(0 0 3px #00f0ff) drop-shadow(0 0 6px rgba(0, 240, 255, 0.4)); }
+}
+
+/* Badge de Estado Activo */
+.osiris-pulse-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 7px;
+  height: 7px;
+  background: var(--osiris-cyan);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--osiris-cyan);
+  animation: osirisPulse 2s infinite;
+}
+
+@keyframes osirisPulse {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.4); opacity: 1; box-shadow: 0 0 12px var(--osiris-cyan); }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+/* --- Panel Lateral J.A.R.V.I.S. Tactical Command Center --- */
+.osiris-hud {
+  position: fixed;
+  top: 68px;
+  right: 16px;
+  width: 440px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 86px);
+  background: var(--osiris-bg);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--osiris-border);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.85), 0 -1px 16px rgba(0, 240, 255, 0.28), 0 0 32px rgba(0, 240, 255, 0.16);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  color: #e2e8f0;
+  overflow: hidden;
+  transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.osiris-hud::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 240, 255, 0.0075) 0px,
+    rgba(0, 240, 255, 0.0075) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.osiris-hud.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-12px) scale(0.98);
+}
+
+/* Cabecera del HUD */
+.osiris-hud-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, rgba(17, 26, 49, 0.96) 0%, rgba(13, 20, 38, 0.94) 100%);
+  border-bottom: 1px solid transparent;
+  border-image: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.3) 30%, rgba(0, 240, 255, 0.3) 70%, transparent) 1;
+  box-shadow: inset 0 -4px 12px rgba(0, 0, 0, 0.35);
+  position: relative;
+  z-index: 2;
+}
+
+.osiris-hud-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.osiris-hud-title svg {
+  width: 26px;
+  height: 26px;
+  animation: jarvisArcPulse 2.8s infinite ease-in-out;
+  flex-shrink: 0;
+}
+
+.osiris-hud-title h2 {
+  font-family: var(--osiris-font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.osiris-title-box {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.osiris-title-sub {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 10px;
+  color: #38bdf8;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.osiris-badge-grid {
+  display: none;
+}
+
+.osiris-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.osiris-close-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Pestañas de Navegación del HUD */
+.osiris-tabs {
+  display: flex;
+  background: rgba(10, 15, 28, 0.95);
+  border-bottom: 1px solid var(--osiris-border);
+}
+
+.osiris-tab-btn {
+  flex: 1;
+  padding: 10px 4px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: #94a3b8;
+  font-family: var(--osiris-font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.osiris-tab-btn:hover {
+  color: #f1f5f9;
+  background: rgba(0, 229, 255, 0.05);
+}
+
+.osiris-tab-btn.active {
+  color: var(--osiris-cyan);
+  border-bottom-color: var(--osiris-cyan);
+  background: rgba(0, 229, 255, 0.08);
+}
+
+/* Cuerpo con scroll */
+.osiris-hud-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.osiris-hud-body::-webkit-scrollbar {
+  width: 5px;
+}
+.osiris-hud-body::-webkit-scrollbar-thumb {
+  background: rgba(0, 229, 255, 0.3);
+  border-radius: 4px;
+}
+
+/* Secciones de Pestaña */
+.osiris-tab-pane {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+.osiris-tab-pane.active {
+  display: flex;
+}
+
+/* Indicador de Estado del Sistema (Limpio, Sin Cuadros) */
+.osiris-status-strip,
+.osiris-mode-banner {
+  background: rgba(15, 23, 42, 0.4);
+  border: none;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.12);
+  color: #94a3b8;
+  font-family: var(--osiris-font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  padding: 6px 4px 10px 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.osiris-live-dot-green {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+  flex-shrink: 0;
+  animation: osirisPulse 2s infinite;
+}
+
+/* Grupos y Tarjetas */
+.osiris-group-title {
+  font-family: var(--osiris-font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--osiris-gold);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.osiris-group-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--osiris-border-gold), transparent);
+}
+
+/* Fila de Capa Conmutable */
+.osiris-layer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.osiris-layer-row:hover {
+  background: rgba(0, 240, 255, 0.05);
+}
+
+.osiris-layer-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.osiris-layer-icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.osiris-layer-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.osiris-layer-desc {
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.osiris-counter {
+  font-family: var(--osiris-font-mono);
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  margin-left: 6px;
+}
+
+/* Switch táctico */
+.osiris-switch {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.osiris-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.osiris-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #334155;
+  border-radius: 20px;
+  transition: 0.3s;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.osiris-slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #cbd5e1;
+  border-radius: 50%;
+  transition: 0.3s;
+}
+
+.osiris-switch input:checked + .osiris-slider {
+  background-color: rgba(0, 229, 255, 0.35);
+  border-color: var(--osiris-cyan);
+  box-shadow: 0 0 10px var(--osiris-cyan-glow);
+}
+
+.osiris-switch input:checked + .osiris-slider:before {
+  transform: translateX(18px);
+  background-color: var(--osiris-cyan);
+  box-shadow: 0 0 6px var(--osiris-cyan);
+}
+
+/* --- RECON Toolkit Styles --- */
+.osiris-recon-box {
+  background: var(--osiris-bg-card);
+  border: 1px solid var(--osiris-border);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.osiris-recon-nav {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.osiris-recon-subtab {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  color: #94a3b8;
+  font-family: var(--osiris-font-mono);
+  font-size: 10px;
+  padding: 6px 2px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.osiris-recon-subtab:hover {
+  background: rgba(0, 229, 255, 0.1);
+  color: #fff;
+}
+
+.osiris-recon-subtab.active {
+  background: rgba(0, 229, 255, 0.2);
+  border-color: var(--osiris-cyan);
+  color: var(--osiris-cyan);
+  font-weight: 700;
+}
+
+.osiris-input-group {
+  display: flex;
+  gap: 6px;
+}
+
+.osiris-input {
+  flex: 1;
+  background: #090e1a;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 6px;
+  color: #f8fafc;
+  font-family: var(--osiris-font-mono);
+  font-size: 11px;
+  padding: 8px 10px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.osiris-input:focus {
+  border-color: var(--osiris-cyan);
+  box-shadow: 0 0 8px var(--osiris-cyan-glow);
+}
+
+.osiris-btn-search {
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.3), rgba(0, 229, 255, 0.15));
+  border: 1px solid var(--osiris-cyan);
+  border-radius: 6px;
+  color: var(--osiris-cyan);
+  font-family: var(--osiris-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 0 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.osiris-btn-search:hover {
+  background: var(--osiris-cyan);
+  color: #000;
+  box-shadow: 0 0 12px var(--osiris-cyan-glow);
+}
+
+.osiris-recon-result {
+  background: #060a14;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 10px;
+  max-height: 220px;
+  overflow-y: auto;
+  font-family: var(--osiris-font-mono);
+  font-size: 10px;
+  line-height: 1.5;
+  color: #cbd5e1;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.osiris-sanctioned-alert {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid var(--osiris-red);
+  color: #fca5a5;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+/* --- Teleport Hotspots Grid --- */
+.osiris-hotspot-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.osiris-hotspot-btn {
+  background: linear-gradient(135deg, rgba(23, 32, 54, 0.75) 0%, rgba(13, 20, 38, 0.85) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 2px solid rgba(0, 240, 255, 0.5);
+  border-radius: 6px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.osiris-hotspot-btn:hover {
+  border-color: rgba(234, 179, 8, 0.6);
+  border-left: 2px solid var(--osiris-gold, #eab308);
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.14) 0%, rgba(15, 23, 42, 0.9) 100%);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4), 0 0 12px rgba(234, 179, 8, 0.2);
+  transform: translateY(-1px);
+}
+
+.osiris-hotspot-name {
+  font-size: 11px;
+  font-weight: 700;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.osiris-hotspot-coords {
+  font-family: var(--osiris-font-mono);
+  font-size: 9px;
+  color: var(--osiris-cyan);
+}
+
+.osiris-hotspot-tag {
+  font-size: 8px;
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+}
+
+/* --- Monitor & Global Telemetry --- */
+.osiris-telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.osiris-telemetry-card {
+  background: linear-gradient(135deg, rgba(16, 26, 48, 0.8) 0%, rgba(9, 14, 28, 0.9) 100%);
+  border: 1px solid rgba(0, 229, 255, 0.12);
+  border-left: 3px solid var(--osiris-cyan, #00f0ff);
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.osiris-telemetry-card .val {
+  font-family: var(--osiris-font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--osiris-cyan);
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.45);
+}
+
+.osiris-telemetry-card .lbl {
+  font-size: 9px;
+  color: #94a3b8;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* --- Floating Media Viewer (News / CCTV) --- */
+.osiris-media-modal {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 420px;
+  max-width: calc(100vw - 40px);
+  background: rgba(9, 13, 24, 0.96);
+  border: 1px solid var(--osiris-cyan);
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8), 0 0 20px var(--osiris-cyan-glow);
+  z-index: 2100;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.osiris-media-modal.hidden {
+  display: none;
+}
+
+.osiris-media-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, 0.95);
+  border-bottom: 1px solid rgba(0, 229, 255, 0.2);
+}
+
+.osiris-media-title {
+  font-family: var(--osiris-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--osiris-cyan);
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.osiris-media-content {
+  width: 100%;
+  height: 236px;
+  background: #000;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.osiris-media-content iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.osiris-media-content img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* --- Estilos de Marcadores y Popups de Leaflet en Capas Osiris --- */
+.leaflet-popup-pane {
+  z-index: 1005 !important;
+}
+
+.osiris-popup .leaflet-popup-content-wrapper {
+  background: rgba(9, 13, 24, 0.96) !important;
+  border: 1px solid var(--osiris-border) !important;
+  border-left: 3px solid var(--osiris-cyan) !important;
+  color: #e2e8f0 !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.85), inset 0 0 16px rgba(0, 240, 255, 0.06) !important;
+  border-radius: 8px !important;
+  max-height: calc(100vh - 160px) !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 240, 255, 0.3) transparent;
+}
+
+.osiris-popup .leaflet-popup-tip {
+  background: rgba(9, 13, 24, 0.96) !important;
+  border: 1px solid var(--osiris-border) !important;
+}
+
+/* Botón Táctico de Enfoque / Zoom en Popups */
+.osiris-popup-btn.osiris-btn-zoom {
+  width: 100%;
+  margin-top: 8px;
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(14, 165, 233, 0.25));
+  border: 1px solid var(--osiris-cyan, #00e5ff);
+  color: #f0fdf4;
+  font-family: var(--osiris-font-mono), monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0, 229, 255, 0.25);
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.osiris-popup-btn.osiris-btn-zoom:hover {
+  background: var(--osiris-cyan, #00e5ff);
+  color: #05131e;
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+.osiris-popup-btn.osiris-btn-zoom:active {
+  transform: translateY(0);
+}
+
+/* Refined popup card layout */
+.osiris-popup .leaflet-popup-content {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.osiris-popup .leaflet-popup-content > div {
+  padding: 12px 14px !important;
+}
+
+.osiris-popup-title {
+  font-family: var(--osiris-font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--osiris-cyan);
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+  letter-spacing: 0.5px;
+}
+
+.osiris-popup-row {
+  font-size: 11px;
+  margin: 5px 0;
+  color: #b0bec5;
+  line-height: 1.5;
+}
+
+.osiris-popup-row strong {
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.osiris-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--osiris-font-mono);
+  font-size: 9px;
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.osiris-live-badge.live-dot::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+}
+
+/* --- Drawers de Cámaras y Noticias en el HUD --- */
+.osiris-drawer-trigger {
+  width: 100%;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px dashed rgba(0, 229, 255, 0.35);
+  color: var(--osiris-cyan);
+  font-family: var(--osiris-font-mono);
+  font-size: 10px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 4px;
+  margin-bottom: 6px;
+  transition: all 0.2s ease;
+}
+
+.osiris-drawer-trigger:hover {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: var(--osiris-cyan);
+  box-shadow: 0 0 8px var(--osiris-cyan-glow);
+}
+
+.osiris-drawer {
+  background: rgba(11, 17, 32, 0.95);
+  border: 1px solid var(--osiris-border);
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 8px;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.osiris-drawer.hidden {
+  display: none;
+}
+
+.osiris-chips {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.osiris-chip {
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  font-family: var(--osiris-font-mono);
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.osiris-chip.active, .osiris-chip:hover {
+  background: rgba(0, 229, 255, 0.2);
+  border-color: var(--osiris-cyan);
+  color: #fff;
+}
+
+.osiris-search-input {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid var(--osiris-border);
+  color: #fff;
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  margin-bottom: 6px;
+  box-sizing: border-box;
+}
+
+.osiris-search-input:focus {
+  outline: none;
+  border-color: var(--osiris-cyan);
+  box-shadow: 0 0 6px var(--osiris-cyan-glow);
+}
+
+.osiris-drawer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.osiris-drawer-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: rgba(30, 41, 59, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 10px;
+  transition: background 0.15s ease;
+}
+
+.osiris-drawer-item:hover {
+  background: rgba(0, 229, 255, 0.1);
+  border-color: rgba(0, 229, 255, 0.3);
+}
+
+.osiris-item-btn {
+  background: #0ea5e9;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.osiris-item-btn:hover {
+  background: #38bdf8;
+}
+
+.osiris-media-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 10px;
+  background: rgba(15, 23, 42, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 10px;
+}
+
+.osiris-media-action-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 10px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.osiris-media-action-btn:hover {
+  background: rgba(0, 229, 255, 0.2);
+  border-color: var(--osiris-cyan);
+  color: #fff;
+}
+
+.osiris-media-fallback-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(15, 23, 42, 0.92);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  font-size: 9px;
+  color: #94a3b8;
+  text-align: center;
+}
+
+.osiris-media-fallback-bar a {
+  color: var(--osiris-cyan);
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+/* Responsividad móvil unificada */
+@media (max-width: 768px) {
+  .osiris-hud {
+    right: 8px !important;
+    left: 8px !important;
+    width: auto !important;
+    max-width: none !important;
+    top: calc(var(--safe-top, 0px) + 98px) !important;
+    max-height: calc(100vh - var(--safe-top, 0px) - 116px) !important;
+    border-radius: 12px !important;
+  }
+
+  body.osiris-ticker-active .osiris-hud {
+    max-height: calc(100vh - var(--safe-top, 0px) - 146px) !important;
+  }
+
+  .osiris-tabs {
+    background: rgba(10, 15, 28, 0.98);
+  }
+
+  .osiris-tab-btn {
+    padding: 8px 2px !important;
+    font-size: 10px !important;
+    letter-spacing: 0.3px !important;
+  }
+
+  .osiris-media-modal {
+    left: 8px !important;
+    right: 8px !important;
+    width: auto !important;
+    max-width: none !important;
+    bottom: calc(52px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  body.osiris-ticker-active .osiris-media-modal {
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  .osiris-mini-bar {
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px)) !important;
+    padding: 5px 12px !important;
+    font-size: 10.5px !important;
+    max-width: calc(100vw - 20px) !important;
+  }
+}
+
+/* ==========================================================================
+   MINI-BARRA FLOTANTE TÁCTICA J.A.R.V.I.S. (CUANDO LA CONSOLA ESTÁ MINIMIZADA)
+   ========================================================================== */
+.osiris-mini-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(0);
+  background: rgba(7, 12, 24, 0.92);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(0, 240, 255, 0.4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 25px rgba(0, 240, 255, 0.25);
+  border-radius: 9999px;
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 1500;
+  color: #e2e8f0;
+  font-family: var(--osiris-font-mono);
+  font-size: 11px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.osiris-mini-bar.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(30px);
+}
+
+.osiris-mini-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--jarvis-cyan, #00f0ff);
+  text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+}
+
+.osiris-mini-brand svg {
+  width: 18px;
+  height: 18px;
+  animation: jarvisArcPulse 2.5s infinite ease-in-out;
+  flex-shrink: 0;
+}
+
+.osiris-mini-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--osiris-cyan);
+  box-shadow: 0 0 6px var(--osiris-cyan);
+  animation: osirisPulse 1.8s infinite;
+}
+
+.osiris-mini-btn {
+  background: rgba(0, 229, 255, 0.15);
+  border: 1px solid var(--osiris-border);
+  color: #fff;
+  border-radius: 9999px;
+  padding: 4px 10px;
+  font-size: 10px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+
+.osiris-mini-btn:hover {
+  background: rgba(0, 229, 255, 0.3);
+  border-color: var(--osiris-cyan);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+}
+
+.osiris-mini-btn.exit {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+.osiris-mini-btn.exit:hover {
+  background: rgba(239, 68, 68, 0.3);
+  border-color: var(--osiris-red);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+
+/* ==========================================================================
+   MICRO-NODOS TÁCTICOS MINIMALISTAS (SIN TEXTOS GIGANTES EN EL MAPA)
+   ========================================================================== */
+
+/* ==========================================================================
+   MICRO-RECTÁNGULOS TÁCTICOS (HUD CHIPS COMPACTOS - CERO DESPLAZAMIENTO)
+   ========================================================================== */
+.osiris-chip-container {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.osiris-chip-container > .osiris-tactical-chip,
+.osiris-chip-container > .osiris-radar-chip {
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+}
+
+.osiris-tactical-chip {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+  background: rgba(8, 14, 26, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-left: 2.5px solid var(--chip-border, rgba(0, 229, 255, 0.6));
+  color: #e2e8f0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  padding: 2.5px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.6);
+  cursor: pointer;
+  box-sizing: border-box;
+  user-select: none;
+  /* NUNCA poner transition: transform aquí para que Leaflet no tenga retardo en zoom */
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.osiris-tactical-chip:hover {
+  background: rgba(15, 23, 42, 0.98);
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8), 0 0 12px var(--chip-glow, rgba(0, 229, 255, 0.5));
+  z-index: 2000 !important;
+}
+
+.osiris-tactical-chip .chip-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 8.5px;
+  font-weight: 700;
+  color: var(--chip-color, #94a3b8);
+}
+
+.osiris-tactical-chip .chip-label {
+  color: #f1f5f9;
+  font-size: 9.5px;
+  font-weight: 500;
+}
+
+/* Variantes de Chip Táctico por Categoría */
+.osiris-chip-conflict {
+  --chip-border: #ef4444;
+  --chip-color: #fca5a5;
+  --chip-glow: rgba(239, 68, 68, 0.7);
+  background: rgba(24, 8, 12, 0.9);
+}
+
+.osiris-chip-choke {
+  --chip-border: #eab308;
+  --chip-color: #fef08a;
+  --chip-glow: rgba(234, 179, 8, 0.7);
+  background: rgba(22, 16, 6, 0.9);
+}
+
+.osiris-chip-news {
+  --chip-border: #22c55e;
+  --chip-color: #86efac;
+  --chip-glow: rgba(34, 197, 94, 0.7);
+  background: rgba(6, 22, 14, 0.9);
+}
+
+.osiris-chip-port {
+  --chip-border: #06b6d4;
+  --chip-color: #67e8f9;
+  --chip-glow: rgba(6, 182, 212, 0.7);
+  background: rgba(6, 18, 28, 0.9);
+}
+
+.osiris-chip-nuke {
+  --chip-border: #a855f7;
+  --chip-color: #e9d5ff;
+  --chip-glow: rgba(168, 85, 247, 0.7);
+  background: rgba(18, 8, 28, 0.9);
+}
+
+/* Micro-Chip de Radares DGT España */
+.osiris-radar-chip {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 3px;
+  background: rgba(15, 23, 42, 0.92);
+  border: 1px solid #38bdf8;
+  color: #f8fafc;
+  font-family: var(--osiris-font-mono), monospace;
+  font-size: 8px;
+  font-weight: 700;
+  padding: 1px 4px;
+  border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.6);
+  cursor: pointer;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.osiris-radar-chip i {
+  color: #38bdf8;
+  font-size: 7px;
+}
+
+.osiris-radar-chip.speed-high {
+  border-color: #ef4444;
+}
+.osiris-radar-chip.speed-high i {
+  color: #ef4444;
+}
+
+.osiris-radar-chip.speed-med {
+  border-color: #f59e0b;
+}
+.osiris-radar-chip.speed-med i {
+  color: #f59e0b;
+}
+
+/* Micro-punto de fuego térmico sin retardo */
+.osiris-node-fire {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #f97316 35%, #dc2626 95%);
+  border: 1px solid #ffedd5;
+  box-shadow: 0 0 6px rgba(249, 115, 22, 0.85);
+  box-sizing: border-box;
+}
+
+/* Polígonos de Delimitación Táctica Real */
+.osiris-zone-poly {
+  stroke-dasharray: 4, 4;
+}
+
+.osiris-nuke-poly {
+  filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.45));
+}
+
+/* ==========================================================================
+   TOOLTIPS TÁCTICOS FLOTANTES (CERO COLISIÓN, MÁXIMA ELEGANCIA)
+   ========================================================================== */
+.leaflet-tooltip.osiris-tactical-tooltip {
+  background: rgba(9, 13, 24, 0.92) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid var(--osiris-border) !important;
+  border-radius: 6px !important;
+  color: #f1f5f9 !important;
+  font-family: var(--osiris-font-mono) !important;
+  font-size: 10px !important;
+  padding: 5px 9px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7), 0 0 10px rgba(0, 229, 255, 0.15) !important;
+  white-space: nowrap !important;
+  pointer-events: none !important;
+}
+
+.leaflet-tooltip-top.osiris-tactical-tooltip::before {
+  border-top-color: rgba(9, 13, 24, 0.92) !important;
+}
+
+.osiris-tt-title {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.osiris-tt-sub {
+  font-size: 9px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.osiris-tt-badge {
+  display: inline-block;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 8px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   SUBPANEL DE CONTROL DE RADARES DGT (PROVINCIA Y MUNICIPIO)
+   ========================================================================== */
+.osiris-radar-subpanel {
+  margin-top: 6px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 6px;
+  padding: 8px 10px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  animation: osirisFadeIn 0.2s ease-out;
+}
+
+.osiris-radar-filter-box {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.osiris-filter-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.osiris-filter-lbl {
+  font-family: var(--osiris-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 75px;
+}
+
+.osiris-filter-select {
+  flex: 1;
+  background: rgba(9, 13, 24, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f1f5f9;
+  font-family: var(--osiris-font-mono);
+  font-size: 10px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+  max-width: 170px;
+}
+
+.osiris-filter-select:hover,
+.osiris-filter-select:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.3);
+}
+
+.osiris-radar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.osiris-btn-order-load {
+  flex: 1;
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.3), rgba(2, 132, 199, 0.45));
+  border: 1px solid #38bdf8;
+  color: #f0f9ff;
+  font-family: var(--osiris-font-mono), monospace;
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+}
+
+.osiris-btn-order-load:hover {
+  background: #38bdf8;
+  color: #0f172a;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.6);
+  transform: translateY(-1px);
+}
+
+.osiris-btn-order-load.loaded {
+  background: rgba(34, 197, 94, 0.25);
+  border-color: #22c55e;
+  color: #86efac;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+}
+
+.osiris-btn-clear {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+  font-size: 10px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.osiris-btn-clear:hover {
+  background: #ef4444;
+  color: #fff;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}
+
+.osiris-filter-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.osiris-filter-count {
+  font-family: var(--osiris-font-mono);
+  font-size: 9px;
+  color: #38bdf8;
+  font-weight: 600;
+}
+
+.osiris-btn-locate {
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid #38bdf8;
+  color: #38bdf8;
+  font-family: var(--osiris-font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.osiris-btn-locate:hover {
+  background: #38bdf8;
+  color: #0f172a;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
+/* ==========================================================================
+   SISTEMA DE DECLUTTERING TÁCTICO PROGRESIVO POR NIVEL DE ZOOM
+   ========================================================================== */
+
+/* 1. Vista Mundial / Continental: Micro-nodos tácticos circulares limpios (cero cajas sobre cajas) */
+.osiris-lod-world .osiris-tactical-chip {
+  padding: 0 !important;
+  width: 9px !important;
+  height: 9px !important;
+  min-width: 9px !important;
+  border-radius: 50% !important;
+  border: 1.5px solid var(--chip-border, #00f0ff) !important;
+  background: var(--chip-border, #00f0ff) !important;
+  box-shadow: 0 0 6px var(--chip-glow, rgba(0, 240, 255, 0.6)) !important;
+  justify-content: center !important;
+  gap: 0 !important;
+}
+
+.osiris-lod-world .osiris-tactical-chip .chip-tag,
+.osiris-lod-world .osiris-tactical-chip .chip-label,
+.osiris-lod-world .chip-tag-text {
+  display: none !important;
+}
+
+/* Interacción: En vista mundial, al pasar el cursor (hover) se revela la etiqueta completa */
+.osiris-lod-world .osiris-tactical-chip:hover {
+  width: auto !important;
+  height: auto !important;
+  min-width: auto !important;
+  border-radius: 4px !important;
+  padding: 3px 8px !important;
+  gap: 5px !important;
+  background: rgba(8, 14, 26, 0.96) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  border-left: 2.5px solid var(--chip-border, #00f0ff) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8), 0 0 10px var(--chip-glow, rgba(0, 240, 255, 0.5)) !important;
+}
+
+.osiris-lod-world .osiris-tactical-chip:hover .chip-tag {
+  display: inline-flex !important;
+}
+
+.osiris-lod-world .osiris-tactical-chip:hover .chip-label {
+  display: inline-block !important;
+  margin-left: 3px !important;
+}
+
+.osiris-lod-world .osiris-tactical-chip:hover .chip-tag-text {
+  display: inline !important;
+}
+
+/* 2. Vista Regional: Etiquetas concisas y estilizadas */
+.osiris-lod-mid .osiris-tactical-chip {
+  padding: 2.5px 7px !important;
+  font-size: 9.5px !important;
+  border-radius: 4px !important;
+}
+
+.osiris-lod-mid .osiris-tactical-chip .chip-label {
+  display: inline-block !important;
+  margin-left: 3px !important;
+  font-size: 9.5px !important;
+  white-space: nowrap !important;
+}
+
+.osiris-lod-mid .chip-tag-text {
+  display: none !important;
+}
+
+/* 3. Vista Táctica de Alta Resolución: Despliegue completo con insignias */
+.osiris-lod-full .osiris-tactical-chip .chip-label {
+  display: inline-block !important;
+}
+
+.osiris-lod-full .chip-tag-text {
+  display: inline !important;
+}
+
+/* Interacción Hover en vista intermedia */
+.osiris-lod-mid .osiris-tactical-chip:hover .chip-tag-text {
+  display: inline !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BANNER / TICKER FINANCIERO J.A.R.V.I.S. (ACCIONES & CRIPTO EN TIEMPO REAL)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.osiris-market-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(28px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: rgba(7, 11, 22, 0.95);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(0, 240, 255, 0.35);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 240, 255, 0.15);
+  z-index: 1400;
+  display: flex;
+  align-items: center;
+  font-family: var(--osiris-font-mono, 'Consolas', monospace);
+  font-size: 11px;
+  color: #e2e8f0;
+  user-select: none;
+  overflow: hidden;
+  box-sizing: border-box;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+}
+
+.osiris-market-banner.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(100%);
+}
+
+.osiris-ticker-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(0, 240, 255, 0.22), rgba(15, 23, 42, 0.95));
+  border-right: 1px solid rgba(0, 240, 255, 0.3);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--jarvis-cyan, #00f0ff);
+  text-shadow: 0 0 6px rgba(0, 240, 255, 0.5);
+  flex-shrink: 0;
+  z-index: 2;
+}
+
+.osiris-ticker-eye {
+  width: 14px;
+  height: 14px;
+  filter: drop-shadow(0 0 4px #00f0ff);
+  flex-shrink: 0;
+}
+
+.osiris-ticker-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+  animation: osirisPulse 1.8s infinite;
+}
+
+.osiris-ticker-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.osiris-ticker-viewport {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.osiris-ticker-viewport:hover .osiris-ticker-track {
+  animation-play-state: paused;
+}
+
+.osiris-ticker-track {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  animation: osirisMarquee 42s linear infinite;
+  will-change: transform;
+}
+
+@keyframes osirisMarquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.osiris-ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 14px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  text-decoration: none !important;
+  color: inherit !important;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.osiris-ticker-item:hover {
+  background: rgba(0, 240, 255, 0.08);
+}
+
+.osiris-ticker-item .ticker-ext-icon {
+  font-size: 8px;
+  color: #64748b;
+  margin-left: 2px;
+  transition: color 0.15s ease;
+}
+
+.osiris-ticker-item:hover .ticker-ext-icon {
+  color: var(--osiris-cyan, #00f0ff);
+}
+
+.osiris-ticker-item .ticker-sym {
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.osiris-ticker-item .ticker-sym.crypto {
+  background: rgba(14, 165, 233, 0.18);
+  color: #38bdf8;
+  border: 1px solid rgba(14, 165, 233, 0.3);
+}
+
+.osiris-ticker-item .ticker-sym.stock {
+  background: rgba(234, 179, 8, 0.16);
+  color: #facc15;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.osiris-ticker-item .ticker-price {
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.osiris-ticker-item .ticker-change {
+  font-size: 10px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.osiris-ticker-item .ticker-change.pos {
+  color: #22c55e;
+}
+
+.osiris-ticker-item .ticker-change.neg {
+  color: #ef4444;
+}
+
+.osiris-ticker-close {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0 9px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.2s ease;
+  z-index: 2;
+  font-size: 11px;
+}
+
+.osiris-ticker-close:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+}
+
+/* Ajustar mini-barra táctica y Leaflet attribution cuando el ticker está activo */
+body.osiris-ticker-active .osiris-mini-bar {
+  bottom: calc(36px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+body.osiris-ticker-active .leaflet-bottom {
+  bottom: calc(30px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+/* Adaptaciones tácticas para móviles y pantallas táctiles */
+@media (max-width: 768px) {
+  .osiris-market-banner {
+    font-size: 10px;
+  }
+
+  .osiris-ticker-badge {
+    padding: 0 8px;
+    gap: 5px;
+  }
+
+  .osiris-ticker-item {
+    padding: 0 10px;
+    gap: 5px;
+  }
+
+  .osiris-ticker-item .ticker-sym {
+    padding: 1px 4px;
+    font-size: 9px;
+  }
+
+  .osiris-ticker-item .ticker-price {
+    font-size: 10.5px;
+  }
+
+  .osiris-ticker-item .ticker-change {
+    font-size: 9.5px;
+  }
+
+  .osiris-ticker-close {
+    padding: 0 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  #osirisMiniZulu {
+    display: none !important;
+  }
+
+  .osiris-mini-bar {
+    gap: 8px !important;
+    padding: 4px 10px !important;
+  }
+
+  .osiris-mini-brand span {
+    font-size: 10px !important;
+  }
+
+  .osiris-mini-btn {
+    padding: 3px 8px !important;
+    font-size: 9.5px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .osiris-ticker-label {
+    display: none !important;
+  }
+
+  .osiris-ticker-badge {
+    padding: 0 6px !important;
+  }
+}
+
+

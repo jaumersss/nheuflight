@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "monitor:dgt": "node monitor-dgt.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

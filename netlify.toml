@@ -1,0 +1,64 @@
+# NheuFlight - Netlify Configuration
+[build]
+  publish = "."
+
+# Edge Functions para baja latencia en todo el mundo
+[[edge_functions]]
+  path = "/flight/api/planes"
+  function = "adsb"
+
+[[edge_functions]]
+  path = "/api/planes"
+  function = "adsb"
+
+[[edge_functions]]
+  path = "/flight/api/adsb/*"
+  function = "adsb"
+
+[[edge_functions]]
+  path = "/api/adsb/*"
+  function = "adsb"
+
+[[edge_functions]]
+  path = "/flight/api/stocks"
+  function = "stocks"
+
+[[edge_functions]]
+  path = "/api/stocks"
+  function = "stocks"
+
+# Funciones Serverless estándar
+[[redirects]]
+  from = "/flight/api/planes*"
+  to = "/.netlify/functions/planes:splat"
+  status = 200
+
+[[redirects]]
+  from = "/api/planes*"
+  to = "/.netlify/functions/planes:splat"
+  status = 200
+
+# Proxies directos
+[[redirects]]
+  from = "/flight/api/adsb/*"
+  to = "https://opendata.adsb.fi/api/v3/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/flight/api/adsblol/*"
+  to = "https://api.adsb.lol/v2/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/adsb/*"
+  to = "https://opendata.adsb.fi/api/v3/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/adsblol/*"
+  to = "https://api.adsb.lol/v2/:splat"
+  status = 200
+  force = true

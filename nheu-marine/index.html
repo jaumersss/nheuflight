@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>NheuMarine — Radar Marítimo en Tiempo Real</title>
+    <meta name="description" content="Radar marítimo AIS en tiempo real para seguimiento de buques, cargueros, ferris y pesqueros." />
+    <meta name="theme-color" content="#060913" />
+
+    <!-- Leaflet & Iconos -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <!-- Tipografías -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="map"></div>
+    <div id="vesselTooltip"></div>
+
+    <div class="ui-shell">
+      <!-- Barra Superior -->
+      <header class="top-bar glass">
+        <div class="brand">
+          <div class="brand-icon"><i class="fas fa-anchor"></i></div>
+          <div>
+            <div class="brand-name">NheuMarine</div>
+            <div class="brand-sub" id="liveStatusText">Tráfico Marítimo AIS</div>
+          </div>
+        </div>
+
+        <div class="search-wrap">
+          <i class="fas fa-search"></i>
+          <input
+            id="searchInput"
+            class="search-input"
+            type="text"
+            placeholder="Buscar por buque, MMSI o destino..."
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+
+        <div class="top-actions">
+          <div class="count-pill" title="Buques visibles en pantalla">
+            <span class="count-dot"></span>
+            <span id="visibleCount">0</span>
+          </div>
+          <button id="locateBtn" class="action-btn" type="button" title="Mi ubicación">
+            <i class="fas fa-location-crosshairs"></i>
+          </button>
+          <button id="resetViewBtn" class="action-btn" type="button" title="Centrar mapa">
+            <i class="fas fa-compass"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Ficha de Buque Seleccionado (Slide-Up) -->
+      <aside id="vesselCard" class="vessel-card">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div id="cardBadgeIcon" class="card-vessel-badge">
+              <i class="fas fa-ship"></i>
+            </div>
+            <div>
+              <h2 id="cardName" class="card-name">—</h2>
+              <div class="card-category">
+                <i class="fas fa-circle" style="font-size: 8px"></i>
+                <span id="cardCategoryText">—</span>
+              </div>
+            </div>
+          </div>
+          <button id="cardCloseBtn" class="card-close-btn" type="button" title="Cerrar ficha">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="card-grid">
+          <div class="grid-cell">
+            <div class="grid-label">Velocidad</div>
+            <div id="cardSpeedKn" class="grid-val">—</div>
+            <div id="cardSpeedKmh" style="font-size: 10px; color: var(--text-muted)">—</div>
+          </div>
+          <div class="grid-cell">
+            <div class="grid-label">Rumbo (COG)</div>
+            <div id="cardCourse" class="grid-val">—</div>
+          </div>
+          <div class="grid-cell">
+            <div class="grid-label">Eslora × Manga</div>
+            <div id="cardDimensions" class="grid-val">—</div>
+          </div>
+          <div class="grid-cell">
+            <div class="grid-label">MMSI</div>
+            <div id="cardMmsi" class="grid-val">—</div>
+          </div>
+          <div class="grid-cell">
+            <div class="grid-label">IMO</div>
+            <div id="cardImo" class="grid-val">—</div>
+          </div>
+          <div class="grid-cell">
+            <div class="grid-label">Coordenadas</div>
+            <div id="cardCoords" class="grid-val" style="font-size: 11px">—</div>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <div class="card-destination">
+            <i class="fas fa-arrow-right-to-city"></i>
+            <span>Destino: <strong id="cardDestination">—</strong></span>
+          </div>
+          <span style="color: var(--accent); font-weight: 500">AIS En Vivo</span>
+        </div>
+      </aside>
+
+      <!-- Barra de Filtros Inferior -->
+      <div class="bottom-dock-wrap">
+        <nav class="filter-strip glass">
+          <button class="filter-chip active" data-filter="all" type="button">
+            Todos
+          </button>
+          <button class="filter-chip" data-filter="cargo" type="button">
+            <span class="filter-dot" style="background: #22c55e"></span>
+            Carga
+          </button>
+          <button class="filter-chip" data-filter="tanker" type="button">
+            <span class="filter-dot" style="background: #ef4444"></span>
+            Petroleros
+          </button>
+          <button class="filter-chip" data-filter="passenger" type="button">
+            <span class="filter-dot" style="background: #3b82f6"></span>
+            Pasaje / Ferris
+          </button>
+          <button class="filter-chip" data-filter="fishing" type="button">
+            <span class="filter-dot" style="background: #f97316"></span>
+            Pesqueros
+          </button>
+          <button class="filter-chip" data-filter="tug" type="button">
+            <span class="filter-dot" style="background: #a855f7"></span>
+            Remolcadores
+          </button>
+          <button class="filter-chip" data-filter="pleasure" type="button">
+            <span class="filter-dot" style="background: #06b6d4"></span>
+            Recreo / Yates
+          </button>
+          <button class="filter-chip" data-filter="military" type="button">
+            <span class="filter-dot" style="background: #eab308"></span>
+            Salvamento
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Scripts del radar marítimo -->
+    <script src="marine-vessels.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

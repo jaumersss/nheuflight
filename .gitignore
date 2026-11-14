@@ -1,0 +1,11 @@
+# Credenciales y configuraci?n privada
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+# Datos de ejecuci?n de los monitores
+state.json
+# Dependencias y ficheros generados
+node_modules/
+.netlify/

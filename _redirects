@@ -1,0 +1,10 @@
+# NheuFlight - Netlify Proxy ADS-B v3
+# 1. Netlify Edge & Serverless Functions
+/flight/api/planes*   /.netlify/functions/planes:splat  200
+/api/planes*          /.netlify/functions/planes:splat  200
+
+# 2. Transparent Upstream Proxies (v3 for adsb.fi, v2 for adsb.lol)
+/flight/api/adsb/*    https://opendata.adsb.fi/api/v3/:splat  200!
+/flight/api/adsblol/*  https://api.adsb.lol/v2/:splat       200!
+/api/adsb/*           https://opendata.adsb.fi/api/v3/:splat  200!
+/api/adsblol/*        https://api.adsb.lol/v2/:splat       200!

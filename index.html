@@ -1,0 +1,1190 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <link rel="icon" type="image/png" href="icon-192.png" />
+    <link rel="shortcut icon" href="icon-192.png" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png" />
+    <title>NheuFlight</title>
+    <meta
+      name="description"
+      content="Radar aéreo en tiempo real - NheuFlight"
+    />
+    <meta name="theme-color" content="#06060f" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="NheuFlight" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=8" />
+    <link rel="stylesheet" href="modern.css?v=22" />
+    <link rel="stylesheet" href="osiris.css?v=59" />
+  </head>
+
+  <body>
+    <div id="map"></div>
+    <div id="mapScrim"></div>
+    <div id="canvasTooltip"></div>
+
+    <!-- ══ INTERFAZ MODERNA (ESTILO NHEUMARINE) ══ -->
+    <div class="ui-shell">
+      <!-- Barra Superior -->
+      <header class="top-bar glass">
+        <div class="brand">
+          <div class="brand-icon">
+            <img src="icon-192.png" alt="NheuFlight" class="brand-logo-img" />
+          </div>
+          <div>
+            <div class="brand-name">NheuFlight</div>
+            <div class="brand-sub" id="liveStatusText">Radar Aéreo en Tiempo Real</div>
+          </div>
+        </div>
+
+        <div class="search-wrap">
+          <i class="fas fa-search"></i>
+          <input
+            id="searchBox"
+            class="search-input"
+            type="text"
+            placeholder="Buscar por vuelo, matrícula o modelo..."
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button id="searchClearBtn" type="button" aria-label="Borrar búsqueda" style="display:none">
+            <i class="fas fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="top-actions">
+          <div class="count-pill" title="Aviones visibles en pantalla">
+            <span class="count-dot"></span>
+            <span id="cnt">0</span>
+            <span id="mobileCnt" style="display:none">0</span>
+          </div>
+          <button id="locateBtn" class="action-btn" type="button" title="Mi ubicación">
+            <i class="fas fa-location-crosshairs"></i>
+          </button>
+          <button id="resetViewBtn" class="action-btn" type="button" title="Centrar mapa">
+            <i class="fas fa-compass"></i>
+          </button>
+          <button id="themeBtn" class="action-btn" type="button" title="Tema">
+            <i class="fas fa-moon" id="themeIcon"></i>
+          </button>
+          <button id="layersToggleBtn" class="action-btn" type="button" title="Capas y opciones">
+            <i class="fas fa-layer-group"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Menú desplegable de Capas -->
+      <div id="layersDropdown" class="layers-dropdown glass" style="display:none">
+        <div class="layers-title">Capas Principales</div>
+        <button class="layer-item-btn active" id="planesToggleBtn" type="button">
+          <i class="fas fa-plane" style="color:#38bdf8"></i>
+          <span style="flex:1">Aviones en Vivo (ADS-B)</span>
+          <i class="fas fa-check" id="planesCheckIcon" style="font-size:11px;color:#22c55e"></i>
+        </button>
+        <button class="layer-item-btn" id="marineToggleBtn" type="button">
+          <i class="fas fa-ship" style="color:#06b6d4"></i>
+          <span style="flex:1">Barcos en Vivo (AIS)</span>
+          <i class="fas fa-check" id="marineCheckIcon" style="font-size:11px;display:none;color:#22c55e"></i>
+        </button>
+        <button class="layer-item-btn" id="osirisMenuBtn" type="button">
+          <svg class="jarvis-arc-reactor osiris-eye-icon" viewBox="0 0 100 100" style="width:16px;height:16px;vertical-align:middle;flex-shrink:0;">
+            <circle cx="50" cy="50" r="46" fill="none" stroke="#00f0ff" stroke-width="2.5" opacity="0.8"/>
+            <circle cx="50" cy="50" r="41" fill="none" stroke="#00e5ff" stroke-width="3" opacity="0.95"/>
+            <circle cx="50" cy="50" r="32" fill="none" stroke="#38bdf8" stroke-width="1.8" stroke-dasharray="3.5 2" opacity="0.85"/>
+            <g fill="#00f0ff">
+              <rect x="47.5" y="9.5" width="5" height="8" rx="1.5" transform="rotate(0 50 50)"/>
+              <rect x="47.5" y="9.5" width="5" height="8" rx="1.5" transform="rotate(36 50 50)"/>
+              <rect x="47.5" y="9.5" width="5" height="8" rx="1.5" transform="rotate(72 50 50)"/>
+              <rect x="47.5" y="9.5" width="5" height="8" rx="1.5" transform="rotate(108 50 50)"/>
+              <rect x="47.5" y="9.5" width="5" height="8" rx="1.5" transform="rotate(144 50 50)"/>
+              <rect x="47.5" y="9.5" width="5" height="8" rx="1.5" transform="rotate(180 50 50)"/>
+              <rect x="47.5" y="9.5" width="5" height="8" rx="1.5" transform="rotate(216 50 50)"/>
+              <rect x="47.5" y="9.5" width="5" height="8" rx="1.5" transform="rotate(252 50 50)"/>
+              <rect x="47.5" y="9.5" width="5" height="8" rx="1.5" transform="rotate(288 50 50)"/>
+              <rect x="47.5" y="9.5" width="5" height="8" rx="1.5" transform="rotate(324 50 50)"/>
+            </g>
+            <circle cx="50" cy="50" r="24.5" fill="none" stroke="#00f0ff" stroke-width="2.2" opacity="0.95"/>
+            <polygon points="50,27.5 68,58.5 32,58.5" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linejoin="round" opacity="0.9"/>
+            <circle cx="50" cy="50" r="10.5" fill="#38bdf8"/>
+            <circle cx="50" cy="50" r="5" fill="#ffffff"/>
+          </svg>
+          <span style="flex:1">Modo J.A.R.V.I.S.</span>
+          <i class="fas fa-check" id="osirisCheckIcon" style="font-size:11px;display:none;color:#00f0ff"></i>
+        </button>
+        <div class="layers-title" style="margin-top:6px">Información Aeronáutica</div>
+        <button class="layer-item-btn" id="rainRadarBtn" type="button">
+          <i class="fas fa-cloud-showers-heavy"></i>
+          <span>Radar de Lluvia</span>
+        </button>
+        <button class="layer-item-btn" id="corridorBtn" type="button">
+          <i class="fas fa-route"></i>
+          <span>Pasillos y Aerovías</span>
+        </button>
+        <button class="layer-item-btn" id="airportBtn" type="button">
+          <i class="fas fa-tower-broadcast"></i>
+          <span>Aeropuertos en Mapa</span>
+        </button>
+        <button class="layer-item-btn" id="firBtn" type="button">
+          <i class="fas fa-map"></i>
+          <span>Espacios Aéreos (FIR)</span>
+        </button>
+        <button class="layer-item-btn" id="airportModalBtn" type="button">
+          <i class="fas fa-magnifying-glass-location"></i>
+          <span>Vuelos por Aeropuerto</span>
+        </button>
+        <button class="layer-item-btn" id="refreshBtn" type="button">
+          <i class="fas fa-rotate-right"></i>
+          <span>Refrescar Datos</span>
+        </button>
+      </div>
+
+      <!-- Alertas Flotantes del Dashboard (Squawks de Emergencia y Helicópteros DGT / SEM) -->
+      <aside id="modernAlertsWrap" class="modern-alerts-wrap" aria-live="polite">
+        <!-- Alertas de Transpondedor (7700, 7600, 7500) -->
+        <div id="squawkAlerts" class="modern-alert-card glass alert-danger" style="display: none">
+          <div class="alert-card-header">
+            <div class="alert-header-title">
+              <i class="fas fa-triangle-exclamation pulse-icon" style="color: #ef4444"></i>
+              <span>Alerta de Emergencia</span>
+            </div>
+          </div>
+          <div id="squawkAlertList" class="alert-card-list"></div>
+        </div>
+
+        <!-- Helicópteros especiales (DGT Pegasus, SEM 112, Mossos, etc.) -->
+        <div id="heliWatch" class="modern-alert-card glass alert-heli" style="display: none">
+          <div class="alert-card-header">
+            <div class="alert-header-title">
+              <i class="fas fa-helicopter" style="color: #f97316"></i>
+              <span>Vigilancia Especial (DGT / SEM)</span>
+            </div>
+          </div>
+          <div id="heliWatchList" class="alert-card-list"></div>
+        </div>
+      </aside>
+
+      <!-- Ficha de Avión Seleccionado (Slide-Up idéntica a NheuMarine) -->
+      <aside id="vesselCard" class="vessel-card glass">
+        <div class="card-header">
+          <div class="card-title-group">
+            <div id="cardBadgeIcon" class="card-vessel-badge">
+              <i class="fas fa-plane"></i>
+            </div>
+            <div>
+              <h2 id="cardName" class="card-name">—</h2>
+              <div class="card-category">
+                <i class="fas fa-circle" style="font-size: 8px"></i>
+                <span id="cardCategoryText">—</span>
+              </div>
+            </div>
+          </div>
+          <button id="cardCloseBtn" class="card-close-btn" type="button" title="Cerrar ficha">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div id="cardPhotoContainer" style="display:none; margin-bottom:12px; border-radius:10px; overflow:hidden; max-height:160px;">
+          <img id="cardPhotoImg" src="" alt="Foto avión" style="width:100%; height:100%; object-fit:cover; display:block;" />
+        </div>
+
+        <div class="card-grid">
+          <div class="grid-cell">
+            <div class="grid-label">Velocidad</div>
+            <div id="cardSpeedKn" class="grid-val">—</div>
+            <div id="cardSpeedKmh" style="font-size: 10px; color: var(--text-muted)">—</div>
+          </div>
+          <div class="grid-cell">
+            <div class="grid-label">Altitud</div>
+            <div id="cardAltFt" class="grid-val">—</div>
+            <div id="cardAltM" style="font-size: 10px; color: var(--text-muted)">—</div>
+          </div>
+          <div class="grid-cell">
+            <div class="grid-label">Rumbo</div>
+            <div id="cardCourse" class="grid-val">—</div>
+          </div>
+          <div class="grid-cell">
+            <div class="grid-label">V. Vertical</div>
+            <div id="cardVspeed" class="grid-val">—</div>
+          </div>
+          <div class="grid-cell">
+            <div class="grid-label">Matrícula / Call</div>
+            <div id="cardReg" class="grid-val">—</div>
+          </div>
+          <div class="grid-cell">
+            <div class="grid-label">Squawk / IMO</div>
+            <div id="cardSquawk" class="grid-val">—</div>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <div class="card-destination">
+            <i class="fas fa-plane-departure" id="cardDestIcon"></i>
+            <span>Ruta: <strong id="cardDestination">—</strong></span>
+          </div>
+          <div class="card-actions-row">
+            <button id="cardCockpitBtn" class="card-action-mini" type="button" title="Cabina 3D"><i class="fas fa-vr-cardboard"></i> 3D</button>
+            <button id="cardFollowBtn" class="card-action-mini" type="button" title="Seguir avión"><i class="fas fa-crosshairs"></i></button>
+            <button id="cardShareBtn" class="card-action-mini" type="button" title="Compartir"><i class="fas fa-share-nodes"></i></button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Barra de Filtros Inferior (conmutador dinámico Aviones / Barcos) -->
+      <div class="bottom-dock-wrap">
+        <!-- Selector de Pestaña de Filtros (visible cuando ambos están activos) -->
+        <div id="dockModeSelector" class="dock-mode-pill glass" style="display:none">
+          <button id="dockTabPlanes" class="dock-tab-btn active" type="button" title="Ver filtros de aviones">
+            <i class="fas fa-plane"></i>
+            <span>Aviones</span>
+          </button>
+          <button id="dockTabMarine" class="dock-tab-btn" type="button" title="Ver filtros de barcos">
+            <i class="fas fa-ship"></i>
+            <span>Barcos</span>
+          </button>
+        </div>
+
+        <!-- Filtros de Aviones -->
+        <nav id="planeFilterStrip" class="filter-strip glass">
+          <button class="filter-chip active" data-filter="all" type="button">
+            <span class="filter-dot" style="background: #64748b; color: #64748b; box-shadow: none"></span>
+            Todos
+          </button>
+          <button class="filter-chip" data-filter="commercial" type="button">
+            <span class="filter-dot" style="background: #38bdf8; color: #38bdf8"></span>
+            Comercial
+          </button>
+          <button class="filter-chip" data-filter="private" type="button">
+            <span class="filter-dot" style="background: #22c55e; color: #22c55e"></span>
+            Jet privado
+          </button>
+          <button class="filter-chip" data-filter="military" type="button">
+            <span class="filter-dot" style="background: #ef4444; color: #ef4444"></span>
+            Militar
+          </button>
+          <button class="filter-chip" data-filter="general" type="button">
+            <span class="filter-dot" style="background: #f97316; color: #f97316"></span>
+            Avionetas
+          </button>
+          <button class="filter-chip" data-filter="heli" type="button">
+            <span class="filter-dot" style="background: #a855f7; color: #a855f7"></span>
+            Helicópteros
+          </button>
+          <button class="filter-chip" data-filter="emergency" type="button">
+            <span class="filter-dot" style="background: #ef4444; color: #ef4444"></span>
+            Emergencia
+          </button>
+          <button class="filter-chip" id="airportModalChip" type="button">
+            <i class="fas fa-tower-broadcast" style="font-size: 11px; margin-right: 2px"></i>
+            Aeropuertos
+          </button>
+        </nav>
+
+        <!-- Filtros de Barcos (AIS) -->
+        <nav id="marineFilterStrip" class="filter-strip glass" style="display:none">
+          <button class="filter-chip active" data-marine-filter="all" type="button">
+            <span class="filter-dot" style="background: #64748b; color: #64748b; box-shadow: none"></span>
+            Todos
+          </button>
+          <button class="filter-chip" data-marine-filter="cargo" type="button">
+            <span class="filter-dot" style="background: #22c55e; color: #22c55e"></span>
+            Carga
+          </button>
+          <button class="filter-chip" data-marine-filter="tanker" type="button">
+            <span class="filter-dot" style="background: #ef4444; color: #ef4444"></span>
+            Petroleros
+          </button>
+          <button class="filter-chip" data-marine-filter="passenger" type="button">
+            <span class="filter-dot" style="background: #3b82f6; color: #3b82f6"></span>
+            Pasaje / Ferris
+          </button>
+          <button class="filter-chip" data-marine-filter="fishing" type="button">
+            <span class="filter-dot" style="background: #f97316; color: #f97316"></span>
+            Pesqueros
+          </button>
+          <button class="filter-chip" data-marine-filter="tug" type="button">
+            <span class="filter-dot" style="background: #a855f7; color: #a855f7"></span>
+            Remolcadores
+          </button>
+          <button class="filter-chip" data-marine-filter="pleasure" type="button">
+            <span class="filter-dot" style="background: #06b6d4; color: #06b6d4"></span>
+            Recreo / Yates
+          </button>
+          <button class="filter-chip" data-marine-filter="military" type="button">
+            <span class="filter-dot" style="background: #eab308; color: #eab308"></span>
+            Salvamento
+          </button>
+          <button class="filter-chip" data-marine-filter="other" type="button">
+            <span class="filter-dot" style="background: #94a3b8; color: #94a3b8"></span>
+            Otros
+          </button>
+        </nav>
+      </div>
+    </div>
+
+
+    <div id="mobileShell">
+      <div id="mobileTopBar" class="mobile-glass">
+        <div class="mobile-brand">
+          <div class="mobile-brand-icon"><i class="fas fa-plane"></i></div>
+          <div>
+            <div class="mobile-brand-name">NheuFlight</div>
+            <div class="mobile-brand-sub" id="mobileStatusLine">
+              Radar en tiempo real
+            </div>
+          </div>
+        </div>
+        <div class="mobile-top-actions">
+          <div class="mobile-top-count" aria-live="polite">
+            <span class="mobile-top-count-label">Visibles</span>
+            <strong id="mobileCnt">-</strong>
+          </div>
+          <button
+            class="mobile-icon-btn"
+            id="mobileLocateBtn"
+            type="button"
+            title="Mi ubicación"
+          >
+            <i class="fas fa-location-crosshairs"></i>
+          </button>
+          <button
+            class="mobile-icon-btn"
+            id="mobileThemeBtn"
+            type="button"
+            title="Tema"
+          >
+            <i class="fas fa-moon" id="mobileThemeIcon"></i>
+          </button>
+
+        </div>
+      </div>
+
+      <div id="mobileBottomTray" class="mobile-glass">
+        <div id="mobileTrayHandle"></div>
+        <div id="mobileBottomDock">
+          <button
+            id="mobileLivePill"
+            type="button"
+            aria-label="Estado en directo"
+          >
+            <span class="mobile-live-dot"></span>
+            <span class="mobile-live-text">LIVE</span>
+          </button>
+          <button
+            class="mobile-dock-btn"
+            id="mobileAirportSearchBtn"
+            type="button"
+            title="Buscar por aeropuerto"
+          >
+            <i class="fas fa-magnifying-glass-location"></i>
+            <span>Vuelos</span>
+          </button>
+          <button
+            class="mobile-dock-btn"
+            id="mobileAirportsBtn"
+            type="button"
+            title="Aeropuertos"
+          >
+            <i class="fas fa-tower-broadcast"></i>
+            <span>Aero</span>
+          </button>
+          <button
+            class="mobile-dock-btn"
+            id="mobileFiltersToggleBtn"
+            type="button"
+            title="Filtros"
+          >
+            <i class="fas fa-filter"></i>
+            <span>Filtros</span>
+          </button>
+          <button
+            class="mobile-dock-btn"
+            id="mobileMoreToggleBtn"
+            type="button"
+            title="Más opciones"
+          >
+            <i class="fas fa-ellipsis"></i>
+            <span>Más</span>
+          </button>
+        </div>
+
+        <div id="mobileFiltersPanel" class="mobile-pop-panel">
+          <div class="mobile-pop-title">Filtros</div>
+          <div id="mobileFilterStrip">
+            <button
+              class="mobile-filter-chip active"
+              data-filter="all"
+              type="button"
+            >
+              Todos
+            </button>
+            <button
+              class="mobile-filter-chip"
+              data-filter="commercial"
+              type="button"
+            >
+              Comercial
+            </button>
+            <button
+              class="mobile-filter-chip"
+              data-filter="private"
+              type="button"
+            >
+              Privado
+            </button>
+            <button
+              class="mobile-filter-chip"
+              data-filter="military"
+              type="button"
+            >
+              Militar
+            </button>
+            <button
+              class="mobile-filter-chip"
+              data-filter="general"
+              type="button"
+            >
+              Avioneta
+            </button>
+            <button class="mobile-filter-chip" data-filter="heli" type="button">
+              Heli
+            </button>
+          </div>
+        </div>
+
+        <div id="mobileMorePanel" class="mobile-pop-panel">
+          <div class="mobile-pop-title">Opciones</div>
+          <div id="mobileMoreActions">
+            <button class="mobile-more-btn" id="mobileFirBtn" type="button">
+              <i class="fas fa-map"></i>
+              <span>FIR</span>
+            </button>
+            <button class="mobile-more-btn" id="mobileRainBtn" type="button">
+              <i class="fas fa-cloud-showers-heavy"></i>
+              <span>Lluvia</span>
+            </button>
+            <button
+              class="mobile-more-btn"
+              id="mobileCorridorBtn"
+              type="button"
+            >
+              <i class="fas fa-route"></i>
+              <span>Pasillos</span>
+            </button>
+            <button
+              class="mobile-more-btn"
+              id="mobileSearchFocusBtn"
+              type="button"
+            >
+              <i class="fas fa-magnifying-glass"></i>
+              <span>Buscar</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="mobile-search-wrap" id="mobileSearchWrap">
+          <i class="fas fa-magnifying-glass"></i>
+          <input
+            id="mobileSearchBox"
+            type="text"
+            placeholder="Buscar matrícula o callsign..."
+          />
+          <button
+            id="mobileSearchClearBtn"
+            type="button"
+            aria-label="Borrar búsqueda"
+          >
+            <i class="fas fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal buscador de aeropuerto -->
+    <div id="airportModal">
+      <div id="airportModalBox">
+        <div id="airportModalHeader">
+          <i class="fas fa-magnifying-glass-location"></i>
+          <span>Vuelos por aeropuerto</span>
+          <button id="airportModalClose"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div id="airportSearchWrap">
+          <input
+            id="airportCodeInput"
+            placeholder="Código IATA o ICAO (ej: BCN, LEBL)"
+            maxlength="4"
+          />
+          <button id="airportSearchBtn">
+            <i class="fas fa-magnifying-glass"></i> Buscar
+          </button>
+        </div>
+        <div id="airportTabsWrap">
+          <div class="ap-tab active" data-tab="arr">Llegando</div>
+          <div class="ap-tab" data-tab="dep">Saliendo</div>
+        </div>
+        <div id="airportResultsWrap">
+          <div class="ap-empty">
+            Introduce un código de aeropuerto para ver los vuelos
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal móvil: avión seleccionado -->
+    <div id="mobileModal">
+      <div id="mobileModalInner">
+        <div id="mobileModalHandle"></div>
+      </div>
+    </div>
+
+    <!-- Pill flotante minimalista para filtro de aerolínea activo (a la derecha) -->
+    <div id="modernOperatorPill" class="modern-operator-pill" style="display: none;">
+      <div class="mop-badge">
+        <i class="fas fa-plane mop-icon"></i>
+        <span>Aerolínea</span>
+      </div>
+      <span class="mop-name" id="mopName">—</span>
+      <span class="mop-count" id="mopCount"></span>
+      <button id="mopClearBtn" type="button" class="mop-close-btn" title="Desactivar filtro de aerolínea" aria-label="Cerrar filtro">
+        <i class="fas fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Panel lateral izquierdo (avión seleccionado) -->
+    <div id="selPanel">
+      <div class="sel-header">
+        <div>
+          <div class="sel-callsign" id="selCall">-</div>
+          <span class="sel-type-badge" id="selBadge"></span>
+          <a id="selFr24Link" href="#" target="_blank" style="color: var(--accent); font-size: 10px; text-decoration: none; margin-top: 4px; display: none; align-items: center; gap: 4px;">
+            <i class="fas fa-arrow-up-right-from-square"></i> Ver en Flightradar24
+          </a>
+        </div>
+        <div style="display: flex; gap: 6px; align-items: flex-start">
+          <button
+            class="sel-close"
+            id="selCenterBtn"
+            title="Centrar en el mapa"
+          >
+            <i class="fas fa-crosshairs"></i>
+          </button>
+          <button
+            class="sel-close"
+            id="selSearchBtn"
+            title="Buscar vuelos"
+          >
+            <i class="fas fa-magnifying-glass"></i>
+          </button>
+
+          <button class="sel-close" id="selClose">
+            <i class="fas fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+      <div id="selPhoto">
+        <div id="selPhotoLoading">
+          <i class="fas fa-spinner fa-spin" style="color: var(--text-faint)"></i
+          ><span style="color: var(--text-faint); font-size: 10.5px"
+            >Buscando foto...</span
+          >
+        </div>
+        <img
+          id="selPhotoImg"
+          src=""
+          alt="Foto del avión"
+          style="display: none"
+        />
+      </div>
+      <div id="selRoute"></div>
+      <details class="sel-details-dropdown" id="selDetailsDropdown" open>
+        <summary class="sel-details-summary">
+          <span><i class="fas fa-sliders" style="margin-right: 6px; color: var(--accent)"></i> Datos técnicos</span>
+          <i class="fas fa-chevron-down caret-icon"></i>
+        </summary>
+        <div class="sel-grid" id="selGrid"></div>
+      </details>
+      <div id="chartContainer" style="display: none !important;">
+        <canvas id="telemetryChart"></canvas>
+      </div>
+      <!-- Info del avión (adsbdb) -->
+      <div id="acHistory" style="display: none; margin-top: 8px">
+        <div class="sel-section-title">
+          <i class="fas fa-circle-info" style="color: var(--accent)"></i> Info del avión
+        </div>
+        <div id="acHistoryContent"></div>
+      </div>
+    </div>
+
+    <!-- Panel principal (derecha) -->
+    <div id="panel">
+      <div id="ph">
+        <div class="logo">
+          <div class="logo-icon">
+            <img src="icon-192.png" alt="NheuFlight" />
+          </div>
+          <div>
+            <div class="lt">NheuFlight</div>
+            <div class="ls">radar en tiempo real</div>
+          </div>
+        </div>
+        <button class="panel-locate-btn" id="locateBtn" type="button">
+          <i class="fas fa-location-crosshairs"></i>
+          <span>Mi ubicación</span>
+        </button>
+
+        <button id="mobilePanelToggle" type="button" aria-label="Abrir panel">
+          <i class="fas fa-sliders"></i>
+        </button>
+      </div>
+
+      <div id="pb">
+        <div id="installBanner" class="hud-card" style="display: none">
+          <div>
+            <div class="hud-kicker">Instalación recomendada</div>
+            <div class="hud-title">Añade NheuFlight al iPhone</div>
+            <div class="hud-copy">
+              En modo app se aprovecha mejor la pantalla y se siente mucho más
+              limpio.
+            </div>
+          </div>
+          <button class="hud-action" id="installBtn" type="button">
+            Instalar
+          </button>
+        </div>
+
+
+        <div class="brow">
+          <button class="btn bg" id="refreshBtn">
+            <i class="fas fa-rotate-right"></i> <span>Refrescar</span>
+          </button>
+          <button class="btn bi" id="rainRadarBtn" title="Radar de lluvia">
+            <i class="fas fa-cloud-showers-heavy"></i>
+          </button>
+          <button class="btn bi" id="corridorBtn" title="Pasillos">
+            <i class="fas fa-route"></i>
+          </button>
+          <button class="btn bi" id="airportBtn" title="Aeropuertos Globales">
+            <i class="fas fa-tower-broadcast"></i>
+          </button>
+          <button
+            class="btn bi"
+            id="firBtn"
+            title="Espacios Aéreos (FIR Mundiales)"
+          >
+            <i class="fas fa-map"></i>
+          </button>
+          <button class="btn bi" id="themeBtn">
+            <i class="fas fa-moon" id="themeIcon"></i>
+          </button>
+        </div>
+
+        <div id="liveBar">
+          <div class="ldot"></div>
+          <span id="liveBarText">Aviones en tiempo real</span>
+        </div>
+
+        <!-- Búsqueda rápida -->
+        <div class="search-wrap">
+          <i class="fas fa-magnifying-glass"></i>
+          <input
+            id="searchBox"
+            type="text"
+            placeholder="Buscar matrícula o callsign..."
+          />
+          <button
+            id="searchClearBtn"
+            type="button"
+            aria-label="Borrar búsqueda"
+            title="Borrar búsqueda"
+          >
+            <i class="fas fa-xmark"></i>
+          </button>
+        </div>
+
+        <div id="operatorFocus">
+          <span id="operatorFocusText"></span>
+          <button
+            id="operatorFocusClear"
+            type="button"
+            title="Quitar resaltado"
+          >
+            <i class="fas fa-xmark"></i>
+          </button>
+        </div>
+
+        <div id="corridorPanel">
+          <div class="corridor-panel-head">
+            <span><i class="fas fa-route"></i> Pasillos</span>
+            <button
+              id="corridorClearBtn"
+              type="button"
+              title="Ocultar pasillos"
+            >
+              <i class="fas fa-xmark"></i>
+            </button>
+          </div>
+          <div class="corridor-search-row">
+            <input
+              id="corridorAirportInput"
+              type="text"
+              maxlength="4"
+              list="corridorAirportOptions"
+              placeholder="BCN o LEBL"
+              autocomplete="off"
+            />
+            <datalist id="corridorAirportOptions"></datalist>
+            <button id="corridorApplyBtn" type="button">
+              <i class="fas fa-location-arrow"></i>
+            </button>
+          </div>
+          <div id="corridorModeBtns">
+            <button
+              class="corridor-mode-btn active"
+              type="button"
+              data-corridor-mode="both"
+            >
+              Ambos
+            </button>
+            <button
+              class="corridor-mode-btn"
+              type="button"
+              data-corridor-mode="arrivals"
+            >
+              Llegadas
+            </button>
+            <button
+              class="corridor-mode-btn"
+              type="button"
+              data-corridor-mode="departures"
+            >
+              Salidas
+            </button>
+          </div>
+          <div id="corridorHint">Azul llegadas · Verde salidas</div>
+        </div>
+
+        <div class="sbox">
+          <span class="slbl"
+            ><i class="fas fa-plane"></i> Aviones visibles</span
+          >
+          <span class="sbadge" id="cnt">—</span>
+        </div>
+        <div class="sbox">
+          <span class="slbl"
+            ><i class="fas fa-globe" style="color: var(--purple)"></i> Vuelos
+            mundiales ahora</span
+          >
+          <span
+            class="sbadge"
+            id="globalCnt"
+            style="
+              background: rgba(167, 139, 250, 0.15);
+              border-color: rgba(167, 139, 250, 0.25);
+              color: var(--purple);
+            "
+            >—</span
+          >
+        </div>
+
+
+
+
+
+        <div id="legend">
+          <div
+            class="leg leg-filter factive"
+            data-filter="all"
+            role="button"
+            tabindex="0"
+          >
+            <div
+              class="legdot"
+              style="background: var(--text-muted); box-shadow: none"
+            ></div>
+            Todos
+          </div>
+          <div
+            class="leg leg-filter"
+            data-filter="commercial"
+            role="button"
+            tabindex="0"
+          >
+            <div
+              class="legdot"
+              style="background: #4f8fff; color: #4f8fff"
+            ></div>
+            Comercial
+          </div>
+          <div
+            class="leg leg-filter"
+            data-filter="private"
+            role="button"
+            tabindex="0"
+          >
+            <div
+              class="legdot"
+              style="background: #22e87a; color: #22e87a"
+            ></div>
+            Jet privado
+          </div>
+          <div
+            class="leg leg-filter"
+            data-filter="military"
+            role="button"
+            tabindex="0"
+          >
+            <div
+              class="legdot"
+              style="background: #ff4b6e; color: #ff4b6e"
+            ></div>
+            Militar
+          </div>
+          <div
+            class="leg leg-filter"
+            data-filter="general"
+            role="button"
+            tabindex="0"
+          >
+            <div
+              class="legdot"
+              style="background: #f5a623; color: #f5a623"
+            ></div>
+            Avioneta
+          </div>
+          <div
+            class="leg leg-filter"
+            data-filter="heli"
+            role="button"
+            tabindex="0"
+          >
+            <div
+              class="legdot"
+              style="background: #a78bfa; color: #a78bfa"
+            ></div>
+            Helicóptero
+          </div>
+        </div>
+
+        <div id="sb">
+          <div id="sd" class="loading"></div>
+          <span id="st">Iniciando...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Left floating plane card (desktop) -->
+    <div id="planeCard">
+      <img id="pcPhoto" src="" alt="Foto del avión" />
+      <div id="pcPhotoPlaceholder">
+        <i class="fas fa-spinner fa-spin"></i> Cargando foto...
+      </div>
+      <div id="pcBody">
+        <div id="pcCall">—</div>
+        <div id="pcBadgeWrap"></div>
+        <div id="pcRoute">
+          <span class="prc" id="pcOrig">—</span>
+          <i
+            class="fas fa-arrow-right"
+            style="color: var(--text-faint); font-size: 9px"
+          ></i>
+          <span class="prc" id="pcDest">—</span>
+        </div>
+        <div class="pc-grid">
+          <div class="pc-cell">
+            <div class="pc-lbl">Altitud</div>
+            <div class="pc-val" id="pcAlt">—</div>
+          </div>
+          <div class="pc-cell">
+            <div class="pc-lbl">Velocidad</div>
+            <div class="pc-val" id="pcSpd">—</div>
+          </div>
+          <div class="pc-cell">
+            <div class="pc-lbl">Rumbo</div>
+            <div class="pc-val" id="pcTrk">—</div>
+          </div>
+          <div class="pc-cell">
+            <div class="pc-lbl">V. vertical</div>
+            <div class="pc-val" id="pcVspd">—</div>
+          </div>
+          <div class="pc-cell">
+            <div class="pc-lbl">Tipo</div>
+            <div class="pc-val" id="pcType">—</div>
+          </div>
+          <div class="pc-cell">
+            <div class="pc-lbl">Matrícula</div>
+            <div class="pc-val" id="pcReg">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile mini card (avión seleccionado en móvil) -->
+    <div id="mobileMiniCard">
+      <div id="mobileMiniCallsign">
+        <span id="mobileMiniCall">—</span>
+        <span>toca para ver detalles</span>
+      </div>
+      <div id="mobileMiniRoute"></div>
+    </div>
+
+    <div id="mobileFlightCard">
+      <div id="mobileFlightHeader">
+        <div id="mobileFlightHeroMain">
+          <div id="mobileFlightCallsignRow">
+            <span id="mobileFlightCall">---</span>
+            <div style="display: flex; gap: 6px; align-items: center">
+              <button
+                id="mobileFlightSearchBtn"
+                type="button"
+                aria-label="Buscar"
+                title="Buscar vuelos"
+                style="background: transparent; border: none; color: var(--text-muted); font-size: 14px; padding: 4px 6px; cursor: pointer;"
+              >
+                <i class="fas fa-magnifying-glass"></i>
+              </button>
+
+              <button
+                id="mobileFlightCloseBtn"
+                type="button"
+                aria-label="Cerrar seleccion"
+              >
+                <i class="fas fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+          <div id="mobileFlightMeta">
+            <span id="mobileFlightBadge">EN VUELO</span>
+            <span id="mobileFlightType">---</span>
+          </div>
+          <div id="mobileFlightOperator">
+            Selecciona un avion para ver su ficha
+          </div>
+        </div>
+        <div id="mobileFlightPhotoWrap">
+          <div id="mobileFlightPhotoFallback">
+            <i class="fas fa-plane"></i>
+          </div>
+          <img id="mobileFlightPhotoImg" alt="Foto del avion" />
+        </div>
+      </div>
+
+      <div id="mobileFlightBody">
+        <div id="mobileFlightRouteCard">
+          <div class="mobile-flight-route-leg">
+            <span class="mobile-flight-route-code" id="mobileFlightOrig"
+              >---</span
+            >
+            <span class="mobile-flight-route-city" id="mobileFlightOrigCity"
+              >Origen</span
+            >
+          </div>
+          <div id="mobileFlightRouteCenter">
+            <i class="fas fa-plane"></i>
+          </div>
+          <div class="mobile-flight-route-leg">
+            <span class="mobile-flight-route-code" id="mobileFlightDest"
+              >---</span
+            >
+            <span class="mobile-flight-route-city" id="mobileFlightDestCity"
+              >Destino</span
+            >
+          </div>
+        </div>
+        <div id="mobileFlightRouteTimes" style="display: none;">
+          <div>🛫 Despegue: <strong id="mobileFlightDepTime">—</strong></div>
+          <div>🛬 Llegada aprox: <strong id="mobileFlightArrTime">—</strong></div>
+        </div>
+
+        <div id="mobileFlightSnapshot">
+          <div class="mobile-flight-snap">
+            <span class="mobile-flight-snap-label">Alt</span>
+            <strong id="mobileFlightAlt">---</strong>
+          </div>
+          <div class="mobile-flight-snap">
+            <span class="mobile-flight-snap-label">Vel</span>
+            <strong id="mobileFlightSpd">---</strong>
+          </div>
+        </div>
+      </div>
+
+      <div id="mobileFlightDetailStrip">
+        <div class="mobile-flight-detail">
+          <span class="mobile-flight-detail-label">Modelo</span>
+          <strong id="mobileFlightModel">---</strong>
+        </div>
+        <div class="mobile-flight-detail">
+          <span class="mobile-flight-detail-label">Matrícula</span>
+          <strong id="mobileFlightReg">---</strong>
+        </div>
+      </div>
+
+      <div id="mobileFlightActions">
+        <button
+          class="mobile-flight-action-btn"
+          id="mobileFlightCenterBtn"
+          type="button"
+        >
+          <i class="fas fa-crosshairs"></i>
+          <span>Centrar</span>
+        </button>
+        <button
+          class="mobile-flight-action-btn mobile-flight-action-primary"
+          id="mobileFlightInfoBtn"
+          type="button"
+        >
+          <i class="fas fa-circle-info"></i>
+          <span>Mas info</span>
+        </button>
+        <button
+          class="mobile-flight-action-btn"
+          id="mobileFlightFavoriteBtn"
+          type="button"
+        >
+          <i class="fas fa-bookmark"></i>
+          <span>Guardar</span>
+        </button>
+        <button
+          class="mobile-flight-action-btn"
+          id="mobileFlightAlertBtn"
+          type="button"
+        >
+          <i class="fas fa-bell"></i>
+          <span>Alerta</span>
+        </button>
+        <button
+          class="mobile-flight-action-btn"
+          id="mobileFlightShareBtn"
+          type="button"
+        >
+          <i class="fas fa-share-nodes"></i>
+          <span>Compartir</span>
+        </button>
+      </div>
+    </div>
+
+    <div id="mobileNearbySheet">
+      <div id="mobileNearbyHead">
+        <div>
+          <div id="mobileNearbyTitle">Aviones cerca del mapa</div>
+          <div id="mobileNearbyHint">
+            Toca uno para abrirlo o desliza la tarjeta
+          </div>
+        </div>
+        <span id="mobileNearbyCount">0</span>
+      </div>
+      <div id="mobileNearbyList"></div>
+    </div>
+
+
+
+
+
+    <!-- Panel lateral derecho del Modo Demo -->
+    <div id="demoNheuModal" class="demo-side-panel">
+      <div class="demo-header">
+        <h3><i class="fas fa-flask"></i> Panel Demo & Simulación</h3>
+        <button id="demoCloseBtn" class="demo-close-btn" type="button" aria-label="Cerrar Panel Demo">
+          <i class="fas fa-xmark"></i>
+        </button>
+      </div>
+
+      <div id="demoPlaneInfo" class="demo-selected-info">
+        Selecciona un avión en el mapa o crea uno nuevo para modificar sus parámetros.
+      </div>
+
+      <div class="demo-section-title">Generar Aeronave</div>
+      <div class="demo-grid-buttons">
+        <button id="demoSpawnDGT" class="demo-action-btn" type="button">
+          <span style="color: #f97316">🚁</span> DGT Pegasus
+        </button>
+        <button id="demoSpawnSEM" class="demo-action-btn" type="button">
+          <span style="color: #ef4444">🚁</span> SEM 112
+        </button>
+        <button id="demoSpawnMossos" class="demo-action-btn" type="button">
+          <span style="color: #3b82f6">🚁</span> Mossos
+        </button>
+        <button id="demoSpawnGCivil" class="demo-action-btn" type="button">
+          <span style="color: #22c55e">🚁</span> Guardia Civil
+        </button>
+        <button id="demoSpawnMayday" class="demo-action-btn" type="button">
+          <span style="color: #ef4444">⚠️</span> Mayday (7700)
+        </button>
+        <button id="demoSpawnCom" class="demo-action-btn" type="button">
+          <span style="color: #38bdf8">✈️</span> Ryanair
+        </button>
+      </div>
+
+      <div class="demo-section-title">Cambiar Seleccionado</div>
+      <div class="demo-grid-buttons">
+        <button id="demoSetDGT" class="demo-action-btn" type="button">
+          <i class="fas fa-helicopter" style="color: #f97316"></i> A DGT
+        </button>
+        <button id="demoSetSEM" class="demo-action-btn" type="button">
+          <i class="fas fa-helicopter" style="color: #ef4444"></i> A SEM
+        </button>
+        <button id="demoSetMossos" class="demo-action-btn" type="button">
+          <i class="fas fa-helicopter" style="color: #3b82f6"></i> A Mossos
+        </button>
+        <button id="demoSetGCivil" class="demo-action-btn" type="button">
+          <i class="fas fa-helicopter" style="color: #22c55e"></i> A G. Civil
+        </button>
+      </div>
+
+      <div class="demo-section-title">Transponder / Squawk</div>
+      <div class="demo-grid-buttons">
+        <button id="demoSquawk7700" class="demo-action-btn" type="button">
+          <span style="color: #ef4444; font-weight: 700">7700</span> Mayday
+        </button>
+        <button id="demoSquawk7600" class="demo-action-btn" type="button">
+          <span style="color: #f59e0b; font-weight: 700">7600</span> Radio (NORDO)
+        </button>
+        <button id="demoSquawk7500" class="demo-action-btn" type="button">
+          <span style="color: #ff2d55; font-weight: 700">7500</span> Secuestro
+        </button>
+        <button id="demoSquawkNormal" class="demo-action-btn" type="button">
+          <span style="color: #22c55e; font-weight: 700">7000</span> VFR Normal
+        </button>
+      </div>
+
+      <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08);">
+        <button id="demoExitBtn" type="button" class="demo-action-btn demo-exit-btn">
+          <i class="fas fa-power-off"></i> Apagar Demo
+        </button>
+      </div>
+    </div>
+
+    <!-- Scripts en orden de dependencia -->
+    <script defer src="data/iata.js?v=50"></script>
+    <script defer src="data/airports.js?v=50"></script>
+    <script defer src="data/initial-planes.js?v=50"></script>
+    <script defer src="dgt-aircraft.js?v=50"></script>
+    <script defer src="classify.js?v=51"></script>
+    <script defer src="nheu-core.js?v=50"></script>
+    <script defer src="nheu-db.js?v=50"></script>
+    <script defer src="nheu-favorites.js?v=50"></script>
+    <script defer src="app-config.js?v=51"></script>
+    <script defer src="app.js?v=54"></script>
+    <script defer src="marine-vessels.js?v=50"></script>
+    <script defer src="marine-tracker.js?v=52"></script>
+    <script defer src="modern.js?v=52"></script>
+    <script defer src="data/cctv-cameras.js?v=50"></script>
+    <script defer src="data/spain-radars.js?v=52"></script>
+    <script defer src="osiris.js?v=59"></script>
+  </body>
+</html>
