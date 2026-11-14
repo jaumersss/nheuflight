@@ -1,52 +1,72 @@
-# NheuFlight
+<p align="center"><img src="icon-192.png" width="72" alt="Logotipo de NheuFlight"></p>
 
-NheuFlight es un radar web para seguir aeronaves y barcos en un mapa interactivo. Puedes buscar un vuelo por su indicativo, seleccionar una aeronave para consultar su trayectoria y activar capas de meteorología, tráfico marítimo y contexto geográfico. La interfaz se adapta a escritorio y móvil.
+<h1 align="center">NheuFlight</h1>
 
-## Radar aéreo
+<p align="center"><strong>Radar aéreo y marítimo en un mapa interactivo</strong></p>
 
-- **Tráfico en directo.** Muestra la posición, el rumbo, la altitud y la velocidad que recibe de fuentes ADS-B. Permite filtrar aeronaves comerciales, privadas, militares y helicópteros, y destaca las alertas por código transpondedor.
-- **Seguimiento de vuelos.** La ficha de cada aeronave reúne su identificación, operador, ruta, estela y telemetría. Cuando hay datos suficientes, muestra la distancia recorrida y restante y distingue entre horas reales, programadas y estimadas.
-- **Búsqueda, favoritos y alertas.** Puedes localizar aeronaves por indicativo, matrícula, origen o destino y guardar vuelos para seguirlos. El repositorio también incluye monitores independientes para enviar avisos de aeronaves de la DGT a Telegram.
-- **Aeropuertos y meteorología.** El mapa incluye capas de aeropuertos, pistas, corredores aéreos y lluvia. El modo aeropuerto permite consultar vuelos asociados, además de informes METAR y pronósticos TAF cuando están disponibles.
-- **Modo demo.** Genera aeronaves simuladas y permite cambiar sus parámetros para probar el seguimiento, los filtros y las alertas.
+[![Radar de NheuFlight sobre el Mediterráneo occidental con aeronaves de ejemplo](docs/radar.jpg)](docs/radar.jpg)
 
-## Radar marítimo
+*Captura de la interfaz con aeronaves de ejemplo.*
 
-La capa marítima muestra embarcaciones a partir de AIS y permite consultar su nombre, posición, rumbo, velocidad, identificador MMSI y destino cuando esos datos se reciben. También hay una versión independiente en [nheu-marine](nheu-marine/), con su propio mapa y servidor.
+## Qué puedes explorar
 
-## Capas de contexto con OSIRIS
+| | En el mapa | Al seleccionar |
+| :---: | --- | --- |
+| ✈️ | **Aeronaves** · Busca por indicativo o matrícula y filtra por tipo. | Altitud, velocidad, rumbo, estela y horarios cuando hay datos. |
+| 🚢 | **Barcos** · Sigue el tráfico AIS o abre el [radar marítimo independiente](nheu-marine/). | Nombre, MMSI, velocidad, rumbo y destino recibido. |
+| 🌦️ | **Aeropuertos y tiempo** · Activa aeropuertos, pistas, corredores y lluvia. | Vuelos asociados, meteorología METAR y pronóstico TAF. |
+| 🌍 | **OSIRIS** · Explora puertos estratégicos, terremotos, incendios y satélites. | Cámaras públicas y emisiones informativas disponibles. |
 
-La integración de OSIRIS añade al mapa terremotos, incendios, satélites, zonas de conflicto, puertos estratégicos, cámaras públicas, radares fijos de tráfico y emisiones informativas. Los modos HORUS y JARVIS permiten acceder a estas capas desde el mismo mapa.
+**Favoritos y alertas** para guardar vuelos · **Modo demo** para simular aeronaves · **Monitores DGT** para [avisos por Telegram](no-hosting/README-DGT-MONITOR.md)
 
-Esta integración está basada en [OSIRIS, el proyecto original de simplifaisoul](https://github.com/simplifaisoul/osiris), publicado bajo [licencia MIT](https://github.com/simplifaisoul/osiris/blob/master/LICENSE). La licencia permite usar, modificar y redistribuir el código original conservando su aviso de copyright y licencia. El [aviso de OSIRIS](LICENSE-OSIRIS.txt) se incluye en este repositorio.
+## De los datos al mapa
 
-## Cómo funciona
+```mermaid
+flowchart LR
+    A["✈️ ADS-B · Posiciones"] --> D["NheuFlight"]
+    B["🚢 AIS · Tráfico marítimo"] --> C["Servidor Node.js"]
+    H["🕒 Aviationstack · Horarios"] --> P["Servidor o Netlify"]
+    C --> D
+    P --> D
+    D --> E["Mapa Leaflet · Fichas y estelas"]
+```
 
-El navegador dibuja el mapa con Leaflet y utiliza Canvas para representar aeronaves y barcos. Entre lecturas ADS-B interpola la posición de las aeronaves para suavizar el movimiento. Un *service worker* guarda los recursos de la interfaz para acelerar las siguientes visitas y permite volver a abrirla sin conexión después de una carga previa. Los datos en directo requieren conexión.
+Los horarios se muestran como **reales**, **programados** o **estimados** según los datos disponibles. Si faltan datos para calcularlos, se muestra `—`. La interfaz se puede volver a abrir sin conexión tras una carga previa.
 
-| Parte del proyecto | Responsabilidad |
+<details>
+<summary><strong>Explorar el código</strong></summary>
+
+| Archivo o carpeta | Qué contiene |
 | --- | --- |
-| [index.html](index.html), [app.js](app.js) y [classify.js](classify.js) | Mapa, seguimiento aéreo, filtros y fichas |
-| [marine-tracker.js](marine-tracker.js) y [nheu-marine](nheu-marine/) | Capa marítima integrada y radar marítimo independiente |
-| [osiris.js](osiris.js) y [data](data/) | Capas de contexto y catálogos locales |
-| [server.js](server.js) y [netlify](netlify/) | Rutas de servidor para consultar proveedores y mantener las claves fuera del navegador |
-| [no-hosting](no-hosting/) y [github-dgt-monitor-repo](github-dgt-monitor-repo/) | Monitores DGT que pueden ejecutarse de forma independiente |
+| [app.js](app.js) y [classify.js](classify.js) | Radar aéreo, fichas, búsqueda y clasificación |
+| [marine-tracker.js](marine-tracker.js) y [nheu-marine](nheu-marine/) | Radar marítimo integrado e independiente |
+| [osiris.js](osiris.js) y [data](data/) | Capas de contexto y catálogos |
+| [server.js](server.js) y [netlify](netlify/) | Conexión con proveedores y manejo de claves en el servidor |
 
-Los datos de posición dependen de la cobertura ADS-B o AIS. Los horarios oficiales dependen de la cobertura y de la cuota de Aviationstack. Si el proveedor carece de datos de un vuelo, NheuFlight intenta estimar los horarios a partir de la trayectoria, la velocidad y las coordenadas de los aeropuertos. Cuando faltan los datos necesarios, el campo queda sin hora.
+</details>
+
+## Créditos
+
+Las capas de contexto se basan en [OSIRIS, de simplifaisoul](https://github.com/simplifaisoul/osiris). El código original se puede usar, modificar y redistribuir bajo la [licencia MIT de OSIRIS](LICENSE-OSIRIS.txt), conservando el aviso de copyright y licencia.
 
 ## Cómo ejecutarlo
 
-Con Node.js 22 o posterior, abre una terminal en la carpeta del proyecto y ejecuta:
+<details>
+<summary><strong>Ver instalación, claves y despliegue</strong></summary>
 
-```sh
-node server.js
-```
+Con Node.js 22 o posterior, ejecuta `node server.js` y abre [localhost:8080](http://localhost:8080). En Windows también puedes usar `iniciar.bat`. Para el radar marítimo independiente, ejecuta `node nheu-marine/server.js` y abre [localhost:8085](http://localhost:8085).
 
-Abre [NheuFlight en el puerto 8080](http://localhost:8080). En Windows también puedes usar `iniciar.bat`. Para iniciar el radar marítimo independiente en el puerto 8085, ejecuta `node nheu-marine/server.js`.
+| Servicio | Variable de entorno |
+| --- | --- |
+| Mapas CARTO | `CARTO_API_KEY` |
+| Horarios | `AVIATIONSTACK_API_KEY` |
+| Barcos en directo | `AIS_KEY` |
+| Alertas DGT | `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` |
 
-### Credenciales y despliegue
+- **En local.** Para el servidor, usa variables de entorno o un archivo `.env` fuera del repositorio con una asignación `NOMBRE=valor` por línea. Ruta predeterminada en Windows: `%LOCALAPPDATA%/NheuFlight/.env`. En macOS y Linux: `~/.config/NheuFlight/.env`. Puedes indicar otra ruta con `NHEU_SECRETS_FILE`.
+- **En Netlify.** Configura CARTO y Aviationstack con alcance de Functions y vuelve a desplegar. Para AIS, configura la URL HTTPS de un servidor Node persistente en `window.NHEU_MARINE_BACKEND_API` dentro de `app-config.js`.
+- **Alertas DGT.** Configura las variables de Telegram en el entorno del monitor o en los secretos de GitHub Actions.
 
-- **Servidor local.** Define `CARTO_API_KEY`, `AVIATIONSTACK_API_KEY` y `AIS_KEY` en el entorno o en un archivo `.env` fuera del repositorio. La ruta predeterminada es `%LOCALAPPDATA%/NheuFlight/.env` en Windows y `~/.config/NheuFlight/.env` en macOS y Linux. Puedes indicar otra ruta con `NHEU_SECRETS_FILE`. Escribe una asignación `NOMBRE=valor` por línea.
-- **Servicios opcionales.** Sin CARTO se usa el mapa de Esri. Sin Aviationstack siguen disponibles las estimaciones cuando hay datos suficientes. La recepción de barcos en directo requiere una clave de AISStream.
-- **Netlify.** Añade las variables de CARTO y Aviationstack con alcance de Functions y vuelve a desplegar. AIS necesita un servidor Node persistente con `AIS_KEY`. Para conectar la capa marítima a ese servidor desde otro dominio, define `window.NHEU_MARINE_BACKEND_API` en `app-config.js` con su URL HTTPS.
-- **Avisos DGT.** Configura `TELEGRAM_BOT_TOKEN` y `TELEGRAM_CHAT_ID` en el entorno del monitor o en los secretos de GitHub Actions.
+Sin CARTO se usa Esri. Sin Aviationstack, el radar estima los horarios cuando dispone de datos suficientes.
+
+</details>
