@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nheuflight-shell-v54';
+const CACHE_NAME = 'nheuflight-shell-v55';
 const APP_SHELL = [
   './index.html',
   './style.css?v=8',
@@ -13,7 +13,7 @@ const APP_SHELL = [
   './nheu-db.js?v=50',
   './nheu-favorites.js?v=50',
   './app-config.js?v=51',
-  './app.js?v=54',
+  './app.js?v=55',
   './marine-vessels.js?v=50',
   './marine-tracker.js?v=52',
   './modern.js?v=52',

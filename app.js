@@ -4862,43 +4862,6 @@ function initMobileChart() {
   }
 }
 
-async function fetchMobileFlightPhoto(hex) {
-  const img = document.getElementById("mobileFlightPhotoImg");
-  const fallback = document.getElementById("mobileFlightPhotoFallback");
-  if (!img || !fallback) return;
-
-  img.style.display = "none";
-  fallback.style.display = "flex";
-
-  try {
-    const r = await fetch(
-      `https://api.planespotters.net/pub/photos/hex/${hex}`,
-    );
-    if (!r.ok) throw new Error();
-    const data = await r.json();
-    const photo = data.photos?.[0];
-    const url =
-      photo?.thumbnail?.src ||
-      photo?.thumbnail_large?.src ||
-      photo?.thumbnail_small?.src;
-    if (!url) throw new Error();
-
-    img.onload = () => {
-      fallback.style.display = "none";
-      img.style.display = "block";
-    };
-    img.onerror = () => {
-      img.style.display = "none";
-      fallback.style.display = "flex";
-    };
-    img.src = url;
-  } catch (e) {
-    img.removeAttribute("src");
-    img.style.display = "none";
-    fallback.style.display = "flex";
-  }
-}
-
 async function fetchMobileFlightPhoto(hex, reg) {
   const wrap = document.getElementById("mobileSelPhoto");
   const load = document.getElementById("mobilePhotoLoading");

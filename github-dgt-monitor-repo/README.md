@@ -22,7 +22,6 @@ Tambien puedes probar sin Telegram si no hay detecciones activas; el script hara
 
 El workflow debe estar en `.github/workflows/dgt-alert.yml` para que GitHub Actions lo detecte.
 
-En macOS, la carpeta `.github` puede quedar oculta en Finder. Por comodidad tienes una copia visible en `dgt-alert.yml`, pero al subir a GitHub asegurate de que el archivo acabe en `.github/workflows/dgt-alert.yml`.
 
 La persistencia usa `state.json` en el propio repositorio: despues de cada cambio real de estado, el workflow commitea ese archivo con `GITHUB_TOKEN`. Asi la siguiente ejecucion sabe que aeronaves DGT ya estaban detectadas y no repite alertas mientras sigan activas.
 
